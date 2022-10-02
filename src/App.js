@@ -10,17 +10,12 @@ import AddContact from './components/AddContact'
 import ContactList from './components/ContactList'
 import ContactDetails from './components/ContactDetail'
 import EditContact from './components/EditContact'
+import { ContactsCrudContextProvider } from './context/ContactsCrudContext'
 
 function App() {
   const [contacts, setContacts] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-
-  //Retrieve contacts API
-  const retrieveContacts = async () => {
-    const response = await api.get("/contacts")
-    return response;
-  }
 
   const addContactHandler = async (contact) => {
 
@@ -35,7 +30,7 @@ function App() {
   }
 
   const updateContactHandler = async (contact) => {
-    
+
     const response = await api.put(`/contacts/${contact.id}`, contact);
     const { id, name, email } = response.data;
 
@@ -44,7 +39,7 @@ function App() {
         return contact.id === id ? { ...response.data } : contact;
       })
     );
-    
+
   };
 
   const removeContactHandler = async (id) => {
@@ -57,12 +52,12 @@ function App() {
 
   const searchHandler = (searchTerm) => {
     setSearchTerm(searchTerm);
-    if(searchTerm !== "") {
+    if (searchTerm !== "") {
       const newContactList = contacts.filter((contact) => {
         return Object.values(contact)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+          .join(" ")
+          .toLowerCase()
+          .includes(searchTerm.toLowerCase());
       });
       setSearchResults(newContactList);
     }
@@ -72,55 +67,28 @@ function App() {
   }
   
   useEffect(() => {
-
-    const getAllContacts = async () => {
-      const allContacts = await retrieveContacts();
-      if (allContacts) setContacts(allContacts);
-    };
-
-    getAllContacts();
-
-  }, []);
-
-  useEffect(() => {
   }, [contacts]);
 
   return (
     <div className="ui container">
       <Router>
         <Header />
-        <Routes>
-          <Route
-            path="/"
-            exact
-            render={(props) => (
-              <ContactList
-                {...props}
-                contacts={searchTerm.length < 1 ? contacts : searchResults}
-                getContactId={removeContactHandler}
-                term={searchTerm}
-                searchKeyWord={searchHandler}
-              />
-            )}
-          />
-          <Route path="/add"
-            render={(props) => (
-              <AddContact
-                {...props}
-                addContactHandler={addContactHandler}
-              />
-            )}
-          />
-          <Route path="/edit"
-            render={(props) => (
-              <EditContact
-                {...props}
-                updateContactHandler={updateContactHandler}
-              />
-            )}
-          />
-          <Route path="/contact/:id" component={ContactDetails} />
-        </Routes>
+        <ContactsCrudContextProvider>
+          <Routes>
+            <Route
+              path="/"
+              exact
+              element={<ContactList />}
+            />
+            <Route path="/add"
+              element={<AddContact />}
+            />
+            <Route path="/edit"
+              element={<EditContact />}
+            />
+            <Route path="/contact/:id" element={<ContactDetails />} />
+          </Routes>
+        </ContactsCrudContextProvider>
       </Router>
     </div>
   );
