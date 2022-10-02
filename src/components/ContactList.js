@@ -6,12 +6,7 @@ import ContactCard from "./ContactCard";
 const ContactList = (props) => {
 
     const {contacts, retrieveContacts} = useContactsCrud();
-    console.log(props);
     const inputEl = useRef("");
-
-    const deleteContactHandler = (id) => {
-        props.getContactId(id);
-    };
 
     useEffect(() => {
         retrieveContacts();
@@ -19,7 +14,7 @@ const ContactList = (props) => {
 
     const renderContactsList = contacts.map((contact) => {
         return (
-            <ContactCard contact={contact} clickHandler={deleteContactHandler} key={contact.id} />
+            <ContactCard contact={contact} key={contact.id} />
         );
     });
 
